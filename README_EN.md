@@ -295,17 +295,77 @@ tail -n 50 /var/log/mihomo-startup-check.log
 
 ```bash
 mihomo-menu
+```
+
+- Open the interactive menu
+- Best entry point for most daily operations
+
+```bash
 mihomo-sub-list
+```
+
+- List all saved subscription sources
+- Marks which one is currently active
+
+```bash
 mihomo-sub-current
+```
+
+- Show the current active subscription name and URL
+
+```bash
 mihomo-sub-use airport1
+```
+
+- Switch to a specific subscription source
+- Automatically regenerates config and restarts Mihomo
+
+```bash
 mihomo-list
+```
+
+- List nodes in the current primary proxy group
+- Uses the original list order numbering
+
+```bash
 mihomo-current
+```
+
+- Show the currently selected node
+
+```bash
 mihomo-delay --timeout 4000
+```
+
+- Test latency for all nodes in the current group
+- Ranking only, no switching
+
+```bash
 mihomo-delay --timeout 4000 --select 1
+```
+
+- Run latency tests
+- Then automatically switch to the fastest node
+
+```bash
 mihomo-test
+```
+
+- Test whether the current proxy is working
+- Usually checks `https://www.google.com/generate_204`
+
+```bash
 mihomo-update
+```
+
+- Update the current active subscription
+- Regenerate config and restart Mihomo
+
+```bash
 mihomo-ui-update
 ```
+
+- Update `metacubexd` WebUI static assets
 
 ## Security Notes
 

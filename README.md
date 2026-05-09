@@ -293,17 +293,77 @@ tail -n 50 /var/log/mihomo-startup-check.log
 
 ```bash
 mihomo-menu
+```
+
+- 打开交互式菜单
+- 适合大多数日常操作入口
+
+```bash
 mihomo-sub-list
+```
+
+- 列出所有已保存的订阅源
+- 会标记当前正在使用的是哪一个
+
+```bash
 mihomo-sub-current
+```
+
+- 查看当前活动订阅的名称和 URL
+
+```bash
 mihomo-sub-use airport1
+```
+
+- 切换到指定订阅源
+- 会自动更新配置并重启 Mihomo
+
+```bash
 mihomo-list
+```
+
+- 列出当前主节点组中的节点
+- 显示的是原始顺序编号
+
+```bash
 mihomo-current
+```
+
+- 查看当前实际选中的节点
+
+```bash
 mihomo-delay --timeout 4000
+```
+
+- 测试当前节点组里所有节点的延迟
+- 只看排名，不做切换
+
+```bash
 mihomo-delay --timeout 4000 --select 1
+```
+
+- 先测速
+- 再自动切到测速结果第 1 名
+
+```bash
 mihomo-test
+```
+
+- 测试当前代理是否可用
+- 一般会访问 `https://www.google.com/generate_204`
+
+```bash
 mihomo-update
+```
+
+- 更新当前活动订阅
+- 重新生成配置并重启 Mihomo
+
+```bash
 mihomo-ui-update
 ```
+
+- 更新 `metacubexd` WebUI 静态文件
 
 ## 安全说明
 
