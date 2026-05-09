@@ -1,5 +1,7 @@
 # mihomo-menu
 
+[中文 README](./README.md) | [English README](./README_EN.md)
+
 一个面向 Linux / SSH / 无图形环境的 Mihomo 命令行管理工具集。
 
 这个项目的出发点很简单：
