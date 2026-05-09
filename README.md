@@ -66,6 +66,15 @@ curl -fsSL https://raw.githubusercontent.com/sunset-move/mihomo-menu/main/instal
 7. 尝试安装 `whiptail`（可选，失败不影响基本功能）
 8. 启用开机健康检查 timer
 
+### 无人值守安装时传入订阅
+
+如果你想在安装时直接带上订阅：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/sunset-move/mihomo-menu/main/install.sh | \
+sudo env MIHOMO_SUBSCRIPTION_NAME=airport1 MIHOMO_SUBSCRIPTION_URL='你的订阅链接' bash
+```
+
 ## 前置要求
 
 这个项目主要是管理层，但安装脚本现在会先做：
@@ -83,6 +92,32 @@ curl -fsSL https://raw.githubusercontent.com/sunset-move/mihomo-menu/main/instal
 - Mihomo 主配置目录：`/etc/mihomo/`
 - Mihomo 控制 API 可用
 - 你已经准备好自己的基础配置/订阅来源
+
+### 现在的自动化边界
+
+安装脚本现在支持：
+
+1. 如果系统里已经有 `mihomo`
+   - 直接复用现有 Mihomo
+   - 尽量沿用已有 `/etc/mihomo/config.yaml`
+   - 会先备份，再补齐 `secret` / `external-controller` / `WebUI` 相关字段
+
+2. 如果系统里没有 `mihomo`
+   - 自动安装官方 Mihomo 核心
+   - 自动创建 `mihomo.service`
+
+3. 如果已经有 `config.yaml`
+   - 先备份原始配置
+   - 再进行最小必要的接入修改
+
+4. 如果没有 `config.yaml`
+   - 若你传入了订阅，则直接根据订阅生成配置
+   - 若没有订阅，则先生成一个最小可启动配置
+
+也就是说：
+
+- **已有环境**：尽量沿用并接入
+- **没有环境**：自动拉起一套可运行的基础系统
 
 ## 当前目录结构
 

@@ -66,6 +66,15 @@ The installer will:
 7. try to install `whiptail` for a better TUI experience
 8. enable the startup health-check timer
 
+### Unattended install with subscription
+
+If you want to pass a subscription during installation:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/sunset-move/mihomo-menu/main/install.sh | \
+sudo env MIHOMO_SUBSCRIPTION_NAME=airport1 MIHOMO_SUBSCRIPTION_URL='your subscription URL' bash
+```
+
 ## Requirements
 
 This project is primarily a management layer, but the installer now does:
@@ -83,6 +92,32 @@ Recommended target environment:
 - Mihomo config directory: `/etc/mihomo/`
 - Mihomo controller API available
 - your own base config / subscription source already planned
+
+### Current automation boundary
+
+The installer now supports:
+
+1. If Mihomo already exists
+   - reuse the existing Mihomo binary
+   - reuse the existing `/etc/mihomo/config.yaml` as much as possible
+   - back it up first, then inject only the fields required by this toolkit
+
+2. If Mihomo does not exist
+   - install the official Mihomo core automatically
+   - create a default `mihomo.service`
+
+3. If `config.yaml` already exists
+   - back it up
+   - patch only the minimum required integration fields
+
+4. If `config.yaml` does not exist
+   - generate one from the provided subscription, if available
+   - otherwise generate a minimal starter config
+
+So in practice:
+
+- **existing environment**: reuse and integrate
+- **no existing environment**: bootstrap a runnable base setup automatically
 
 ## Project Structure
 

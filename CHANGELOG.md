@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.2.0] - 2026-05-09
+
+### Added
+
+- Automatic Mihomo core detection in `install.sh`
+- Automatic official Mihomo installation when core is missing
+- Default `systemd/mihomo.service` template
+- Optional unattended install with:
+  - `MIHOMO_SUBSCRIPTION_URL`
+  - `MIHOMO_SUBSCRIPTION_NAME`
+- Automatic minimal config generation when no config exists
+- Existing config backup and patch flow during installation
+- English README
+
+### Changed
+
+- Installer now supports both:
+  - existing Mihomo environments
+  - fresh deployments from scratch
+- README updated to describe the full one-click deployment behavior
+
 ## [v0.1.0] - 2026-05-09
 
 ### Added
