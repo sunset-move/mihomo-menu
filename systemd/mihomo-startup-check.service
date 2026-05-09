@@ -1,0 +1,8 @@
+[Unit]
+Description=Mihomo startup health check
+Wants=network-online.target
+After=network-online.target mihomo.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/mihomo-startup-check.sh

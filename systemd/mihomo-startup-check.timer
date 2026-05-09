@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Mihomo startup health check after boot
+
+[Timer]
+OnBootSec=90sec
+AccuracySec=15sec
+Unit=home-startup-check.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target
