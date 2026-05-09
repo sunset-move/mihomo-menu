@@ -56,30 +56,33 @@ curl -fsSL https://raw.githubusercontent.com/sunset-move/mihomo-menu/main/instal
 The installer will:
 
 1. download the repository archive
-2. install scripts into `/usr/local/bin/`
-3. install systemd files into `/etc/systemd/system/`
-4. create:
+2. detect whether Mihomo already exists on the system
+3. if Mihomo is missing, install the official Mihomo core automatically
+4. install scripts into `/usr/local/bin/`
+5. install systemd files into `/etc/systemd/system/`
+6. create:
    - `/etc/mihomo/subscriptions.d`
    - `/etc/mihomo/secret.key` if missing
-5. try to install `whiptail` for a better TUI experience
-6. enable the startup health-check timer
+7. try to install `whiptail` for a better TUI experience
+8. enable the startup health-check timer
 
 ## Requirements
 
-This project does **not** install the Mihomo core itself. It is a management layer.
+This project is primarily a management layer, but the installer now does:
 
-Expected environment:
+1. detect an existing Mihomo binary
+2. install the official Mihomo core automatically if missing
 
-- Mihomo binary installed
-  - recommended path: `/usr/local/bin/mihomo`
-- Mihomo config directory:
-  - `/etc/mihomo/`
-- current active subscription file:
-  - `/etc/mihomo/subscription.url`
+There is still an important boundary:
+
+- this toolkit manages subscriptions, node selection, latency testing, and health checks
+- it does not magically design your full production rule logic for you
+
+Recommended target environment:
+
+- Mihomo config directory: `/etc/mihomo/`
 - Mihomo controller API available
-  - common examples:
-    - `127.0.0.1:9090`
-    - `0.0.0.0:9090`
+- your own base config / subscription source already planned
 
 ## Project Structure
 

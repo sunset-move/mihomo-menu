@@ -56,28 +56,33 @@ curl -fsSL https://raw.githubusercontent.com/sunset-move/mihomo-menu/main/instal
 这个安装脚本会：
 
 1. 下载当前仓库
-2. 把脚本安装到 `/usr/local/bin/`
-3. 把 systemd 文件安装到 `/etc/systemd/system/`
-4. 自动创建：
+2. 检测系统中是否已有 `mihomo`
+3. 如果没有，自动安装官方 Mihomo 核心
+4. 把脚本安装到 `/usr/local/bin/`
+5. 把 systemd 文件安装到 `/etc/systemd/system/`
+6. 自动创建：
    - `/etc/mihomo/subscriptions.d`
    - `/etc/mihomo/secret.key`（如果不存在）
-5. 尝试安装 `whiptail`（可选，失败不影响基本功能）
-6. 启用开机健康检查 timer
+7. 尝试安装 `whiptail`（可选，失败不影响基本功能）
+8. 启用开机健康检查 timer
 
 ## 前置要求
 
-这个项目**不负责安装 Mihomo 核心本体**，它是管理层。
+这个项目主要是管理层，但安装脚本现在会先做：
 
-你需要已经有这些基础条件：
+1. 检测系统中是否已有 `mihomo`
+2. 如果没有，则自动安装官方 Mihomo 核心
 
-- `mihomo` 可执行文件
-  - 推荐路径：`/usr/local/bin/mihomo`
-- Mihomo 主配置目录：
-  - `/etc/mihomo/`
-- 当前活动订阅文件：
-  - `/etc/mihomo/subscription.url`
+不过你仍然需要理解一个边界：
+
+- 这套工具负责**管理、订阅切换、测速、健康检查**
+- 不负责替你生成完整可用的业务规则配置逻辑
+
+推荐的目标环境：
+
+- Mihomo 主配置目录：`/etc/mihomo/`
 - Mihomo 控制 API 可用
-  - 默认示例：`127.0.0.1:9090` 或 `0.0.0.0:9090`
+- 你已经准备好自己的基础配置/订阅来源
 
 ## 当前目录结构
 

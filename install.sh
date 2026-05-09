@@ -2,11 +2,13 @@
 set -euo pipefail
 
 REPO_ARCHIVE_URL="https://github.com/sunset-move/mihomo-menu/archive/refs/heads/main.tar.gz"
+MIHOMO_RELEASE_API="https://api.github.com/repos/MetaCubeX/mihomo/releases/latest"
 INSTALL_PREFIX="/usr/local/bin"
 LIB_PREFIX="/usr/local/lib"
 SYSTEMD_DIR="/etc/systemd/system"
 MIHOMO_DIR="/etc/mihomo"
 TMP_DIR=""
+MIHOMO_BIN_PATH=""
 
 cleanup() {
   [[ -n "$TMP_DIR" && -d "$TMP_DIR" ]] && rm -rf "$TMP_DIR"
@@ -67,24 +69,115 @@ prepare_source_tree() {
   echo "${TMP_DIR}/mihomo-menu-main"
 }
 
+detect_arch() {
+  local arch
+  arch=$(uname -m)
+  case "$arch" in
+    x86_64|amd64)
+      echo "linux-amd64"
+      ;;
+    aarch64|arm64)
+      echo "linux-arm64"
+      ;;
+    armv7l|armv7)
+      echo "linux-armv7"
+      ;;
+    armv6l|armv6)
+      echo "linux-armv6"
+      ;;
+    *)
+      echo "unsupported"
+      ;;
+  esac
+}
+
+find_existing_mihomo() {
+  if command -v mihomo >/dev/null 2>&1; then
+    command -v mihomo
+    return 0
+  fi
+
+  local candidate
+  for candidate in /usr/local/bin/mihomo /usr/bin/mihomo /opt/mihomo/mihomo; do
+    if [[ -x "$candidate" ]]; then
+      echo "$candidate"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+install_mihomo_core() {
+  local arch_tag release_json asset_url tmp_gz
+  arch_tag=$(detect_arch)
+  if [[ "$arch_tag" == "unsupported" ]]; then
+    echo "不支持的系统架构：$(uname -m)" >&2
+    echo "请先手动安装 Mihomo 核心，再执行本安装脚本。" >&2
+    exit 1
+  fi
+
+  echo "[2/7] 未检测到 Mihomo，开始自动安装核心..."
+  release_json=$(mktemp)
+  curl -fsSL -H "User-Agent: mihomo-menu-installer" "$MIHOMO_RELEASE_API" -o "$release_json"
+  asset_url=$(python3 - "$release_json" "$arch_tag" <<'PY'
+import json
+import sys
+
+release_path, arch_tag = sys.argv[1], sys.argv[2]
+data = json.load(open(release_path, 'r', encoding='utf-8'))
+target = None
+for asset in data.get("assets", []):
+    name = asset.get("name", "")
+    if arch_tag in name and name.endswith(".gz"):
+        if "-compatible" in name:
+            continue
+        target = asset.get("browser_download_url")
+        break
+if not target:
+    raise SystemExit("No suitable Mihomo release asset found")
+print(target)
+PY
+  )
+
+  tmp_gz=$(mktemp)
+  curl -fsSL "$asset_url" -o "$tmp_gz"
+  gunzip -c "$tmp_gz" > /usr/local/bin/mihomo
+  chmod 0755 /usr/local/bin/mihomo
+  rm -f "$tmp_gz" "$release_json"
+  MIHOMO_BIN_PATH="/usr/local/bin/mihomo"
+  echo "[2/7] Mihomo 已安装到 ${MIHOMO_BIN_PATH}"
+}
+
+ensure_mihomo_core() {
+  local existing
+  if existing=$(find_existing_mihomo); then
+    MIHOMO_BIN_PATH="$existing"
+    echo "[2/7] 检测到已有 Mihomo: ${MIHOMO_BIN_PATH}"
+    return
+  fi
+
+  install_mihomo_core
+}
+
 ensure_secret() {
   mkdir -p "$MIHOMO_DIR/subscriptions.d"
 
   if [[ ! -f "$MIHOMO_DIR/secret.key" ]]; then
-    echo "[2/6] 生成 /etc/mihomo/secret.key ..."
+    echo "[3/7] 生成 /etc/mihomo/secret.key ..."
     python3 - <<'PY' > "$MIHOMO_DIR/secret.key"
 import secrets
 print(secrets.token_urlsafe(16))
 PY
     chmod 600 "$MIHOMO_DIR/secret.key"
   else
-    echo "[2/6] 已存在 /etc/mihomo/secret.key，跳过生成"
+    echo "[3/7] 已存在 /etc/mihomo/secret.key，跳过生成"
   fi
 }
 
 install_scripts() {
   local src_root="$1"
-  echo "[3/6] 安装脚本到 ${INSTALL_PREFIX} ..."
+  echo "[4/7] 安装脚本到 ${INSTALL_PREFIX} ..."
   install -d "$INSTALL_PREFIX"
   install -d "$LIB_PREFIX"
   install -m 0755 "${src_root}/scripts/mihomo-current.sh" "${INSTALL_PREFIX}/mihomo-current"
@@ -108,11 +201,11 @@ install_scripts() {
 install_systemd_files() {
   local src_root="$1"
   if ! command -v systemctl >/dev/null 2>&1; then
-    echo "[4/6] 当前系统没有 systemd，跳过 service/timer 安装"
+    echo "[5/7] 当前系统没有 systemd，跳过 service/timer 安装"
     return
   fi
 
-  echo "[4/6] 安装 systemd 文件..."
+  echo "[5/7] 安装 systemd 文件..."
   install -d "$SYSTEMD_DIR"
   install -m 0644 "${src_root}/systemd/mihomo-startup-check.service" "${SYSTEMD_DIR}/mihomo-startup-check.service"
   install -m 0644 "${src_root}/systemd/mihomo-startup-check.timer" "${SYSTEMD_DIR}/mihomo-startup-check.timer"
@@ -121,25 +214,27 @@ install_systemd_files() {
 }
 
 show_summary() {
-  echo "[5/6] 尝试安装 whiptail（可选）..."
+  echo "[6/7] 尝试安装 whiptail（可选）..."
   install_whiptail_best_effort
 
-  echo "[6/6] 安装完成"
+  echo "[7/7] 安装完成"
   echo
+  echo "Mihomo 核心路径: ${MIHOMO_BIN_PATH}"
   echo "你接下来通常只需要这些命令："
   echo "  mihomo-menu"
   echo "  mihomo-sub-add airport1 '你的订阅链接'"
   echo "  mihomo-sub-use airport1"
   echo "  mihomo-delay --timeout 4000 --select 1"
   echo
-  echo "如果你已经有 Mihomo 核心和 /etc/mihomo/config.yaml，可以直接开始用。"
-  echo "如果没有，请先安装 Mihomo 本体，再使用这套管理脚本。"
+  echo "如果你已经有 /etc/mihomo/config.yaml，可以直接开始用。"
+  echo "如果还没有配置文件，请先准备基础 Mihomo 配置后再使用订阅/节点管理脚本。"
 }
 
 main() {
   require_root
   local src_root
   src_root=$(prepare_source_tree)
+  ensure_mihomo_core
   ensure_secret
   install_scripts "$src_root"
   install_systemd_files "$src_root"
