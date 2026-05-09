@@ -123,30 +123,30 @@ So in practice:
 
 ```mermaid
 flowchart TD
-    A["Start install.sh"] --> B{"Is Mihomo already installed?"}
-    B -- "Yes" --> C["Reuse existing Mihomo binary"]
-    B -- "No" --> D["Install official Mihomo based on detected architecture"]
+    A["Run<br/>install.sh"] --> B{"Existing<br/>mihomo?"}
+    B -- "Yes" --> C["Reuse existing<br/>Mihomo binary"]
+    B -- "No" --> D["Install official Mihomo<br/>based on architecture"]
 
-    C --> E{"Does /etc/mihomo/config.yaml already exist?"}
+    C --> E{"Existing<br/>config.yaml?"}
     D --> E
 
-    E -- "Yes" --> F["Back up existing config.yaml"]
-    F --> G["Patch only the fields required by this project<br/>such as secret / external-controller / external-ui"]
+    E -- "Yes" --> F["Back up<br/>existing config.yaml"]
+    F --> G["Patch only required fields<br/>secret / controller / ui"]
 
-    E -- "No" --> H{"Was a subscription provided?"}
-    H -- "Yes" --> I["Save subscription into /etc/mihomo/subscriptions.d/"]
+    E -- "No" --> H{"Subscription<br/>provided?"}
+    H -- "Yes" --> I["Save subscription into<br/>subscriptions.d"]
     I --> J["Activate current subscription"]
-    J --> K["Generate config.yaml from subscription"]
-    H -- "No" --> L["Generate a minimal starter config"]
+    J --> K["Generate<br/>config.yaml"]
+    H -- "No" --> L["Generate minimal<br/>starter config"]
 
-    G --> M["Install mihomo-menu scripts"]
+    G --> M["Install<br/>mihomo-menu scripts"]
     K --> M
     L --> M
 
-    M --> N["Install systemd files"]
-    N --> O["Enable mihomo-startup-check.timer"]
-    O --> P["Try to install whiptail"]
-    P --> Q["Finish installation"]
+    M --> N["Install<br/>systemd files"]
+    N --> O["Enable startup-check<br/>timer"]
+    O --> P["Try to install<br/>whiptail"]
+    P --> Q["Finish"]
 ```
 
 ## Project Structure
