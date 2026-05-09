@@ -119,6 +119,36 @@ sudo env MIHOMO_SUBSCRIPTION_NAME=airport1 MIHOMO_SUBSCRIPTION_URL='你的订阅
 - **已有环境**：尽量沿用并接入
 - **没有环境**：自动拉起一套可运行的基础系统
 
+### 安装流程图
+
+```mermaid
+flowchart TD
+    A["开始执行 install.sh"] --> B{"系统里是否已有 mihomo?"}
+    B -- "有" --> C["复用现有 mihomo 二进制"]
+    B -- "没有" --> D["按系统架构自动安装官方 mihomo"]
+
+    C --> E{"是否已有 /etc/mihomo/config.yaml ?"}
+    D --> E
+
+    E -- "有" --> F["备份现有 config.yaml"]
+    F --> G["仅补齐本项目需要的字段<br/>如 secret / external-controller / external-ui"]
+
+    E -- "没有" --> H{"是否提供订阅?"}
+    H -- "有" --> I["保存订阅到 /etc/mihomo/subscriptions.d/"]
+    I --> J["激活当前订阅"]
+    J --> K["根据订阅生成 config.yaml"]
+    H -- "没有" --> L["生成最小可启动配置"]
+
+    G --> M["安装 mihomo-menu 脚本"]
+    K --> M
+    L --> M
+
+    M --> N["安装 systemd 文件"]
+    N --> O["启用 mihomo-startup-check.timer"]
+    O --> P["尝试安装 whiptail"]
+    P --> Q["完成安装"]
+```
+
 ## 当前目录结构
 
 ```text

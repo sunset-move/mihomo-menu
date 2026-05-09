@@ -119,6 +119,36 @@ So in practice:
 - **existing environment**: reuse and integrate
 - **no existing environment**: bootstrap a runnable base setup automatically
 
+### Installation Flowchart
+
+```mermaid
+flowchart TD
+    A["Start install.sh"] --> B{"Is Mihomo already installed?"}
+    B -- "Yes" --> C["Reuse existing Mihomo binary"]
+    B -- "No" --> D["Install official Mihomo based on detected architecture"]
+
+    C --> E{"Does /etc/mihomo/config.yaml already exist?"}
+    D --> E
+
+    E -- "Yes" --> F["Back up existing config.yaml"]
+    F --> G["Patch only the fields required by this project<br/>such as secret / external-controller / external-ui"]
+
+    E -- "No" --> H{"Was a subscription provided?"}
+    H -- "Yes" --> I["Save subscription into /etc/mihomo/subscriptions.d/"]
+    I --> J["Activate current subscription"]
+    J --> K["Generate config.yaml from subscription"]
+    H -- "No" --> L["Generate a minimal starter config"]
+
+    G --> M["Install mihomo-menu scripts"]
+    K --> M
+    L --> M
+
+    M --> N["Install systemd files"]
+    N --> O["Enable mihomo-startup-check.timer"]
+    O --> P["Try to install whiptail"]
+    P --> Q["Finish installation"]
+```
+
 ## Project Structure
 
 ```text
